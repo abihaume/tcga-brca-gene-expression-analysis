@@ -1,4 +1,4 @@
-# 🧬 Cancer Gene Expression Analysis Using TCGA-BRCA RNA-seq Data
+# 🧬  TCGA-BRCA Breast Cancer Gene Expression Analysis
 
 ## End-to-End Bioinformatics Pipeline Using Databricks and Python
 
