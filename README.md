@@ -72,19 +72,17 @@ The complete workflow was developed in **Databricks** using **Python** and demon
 
 # 📊 Key Results
 
-- Processed **1,211** TCGA-BRCA samples
-- Analyzed **20,530** genes
-- Identified significantly differentially expressed genes between tumor and normal tissue
-- PCA demonstrated clear separation between tumor and normal samples
-- K-Means clustering identified biologically meaningful sample groups
-- Logistic Regression achieved:
+*  Processed **1,211** TCGA-BRCA samples
+*  Analyzed **20,530** genes
+*  Identified significantly differentially expressed genes between tumor and normal tissue
+*  PCA demonstrated clear separation between tumor and normal samples
+*  K-Means clustering identified biologically meaningful sample groups
+*  Logistic Regression achieved:
   - **Accuracy:** 98.35%
   - **Precision (Tumor):** 0.99
   - **Recall (Tumor):** 0.99
 
 ---
-
-# 📁 Repository Structure
 
 # 📁 Repository Structure
 
