@@ -87,7 +87,7 @@ The raw data files are not stored in this repository because of their size (see 
 **PCA and clustering**
 
 * PCA largely separates normal samples (high PC1 and PC2) from tumors, with some overlap that reflects tumor heterogeneity
-* The two K-Means clusters do not correspond to tumor vs normal, which points to other structure in the data such as molecular subtypes
+* The two K-Means clusters do not correspond to tumor vs normal. Compared with PAM50 subtypes, cluster 0 is dominated by Luminal A (373 samples) and Normal-like (110), while cluster 1 holds most Basal-like tumors (81 of 141). The main structure on PC1/PC2 therefore reflects molecular subtype as well as tissue type
 
 ![PCA plot](figures/pca_plot.png)
 
@@ -100,7 +100,9 @@ The raw data files are not stored in this repository because of their size (see 
 | ROC-AUC | 0.996 |
 | Baseline (always predict "Tumor") | 90.5% |
 
-Because only about 9% of samples are normal, balanced accuracy and ROC-AUC are the more informative metrics. The notebook also reports 5-fold cross-validation with scaling and PCA fitted inside each fold, so no information from the test samples leaks into training.
+Because only about 9% of samples are normal, balanced accuracy and ROC-AUC are the more informative metrics.
+
+**Leakage-free 5-fold cross-validation** (scaling and PCA fitted inside each fold): accuracy 97.6% ± 1.2, balanced accuracy 91.6% ± 4.7, ROC-AUC 0.988 ± 0.007. These slightly lower numbers are the more honest estimate of performance on new samples.
 
 ---
 
