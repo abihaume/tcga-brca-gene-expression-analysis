@@ -1,4 +1,4 @@
-# 🧬  TCGA-BRCA Breast Cancer Gene Expression Analysis
+# 🧬 TCGA-BRCA Breast Cancer Gene Expression Analysis
 
 ## End-to-End Bioinformatics Pipeline Using Databricks and Python
 
@@ -10,9 +10,9 @@
 
 # 📖 Project Overview
 
-This project presents an end-to-end bioinformatics workflow for analyzing breast cancer RNA-seq data obtained from **The Cancer Genome Atlas (TCGA-BRCA)**. The objective was to identify transcriptomic differences between tumor and normal breast tissue using statistical analysis, unsupervised learning, and supervised machine learning techniques.
+This project presents an end-to-end bioinformatics workflow for analyzing breast cancer RNA-seq data from **The Cancer Genome Atlas (TCGA-BRCA)**. The objective is to identify transcriptomic differences between tumor and normal breast tissue using statistical analysis, unsupervised learning, and supervised machine learning.
 
-The complete workflow was developed in **Databricks** using **Python** and demonstrates common approaches used in cancer genomics and bioinformatics research.
+The workflow was developed in **Databricks** using **Python**.
 
 ---
 
@@ -22,24 +22,28 @@ The complete workflow was developed in **Databricks** using **Python** and demon
 * Integrate clinical metadata
 * Annotate tumor and normal tissue samples
 * Perform exploratory data analysis
-* Conduct differential gene expression analysis
-* Visualize results using Volcano Plots
-* Reduce dimensionality using Principal Component Analysis (PCA)
-* Cluster samples using K-Means
-* Build a Logistic Regression classifier for tumor prediction
+* Run genome-wide differential gene expression analysis with FDR correction
+* Visualize results with a volcano plot
+* Reduce dimensionality with Principal Component Analysis (PCA)
+* Cluster samples with K-Means and compare clusters with PAM50 subtypes
+* Build and evaluate a Logistic Regression classifier for tumor prediction
 
 ---
 
-# 📂 Dataset
+# 📂 Data
 
-**Source:** The Cancer Genome Atlas (TCGA-BRCA)
+**Source:** [UCSC Xena](https://xenabrowser.net/datapages/?cohort=TCGA%20Breast%20Cancer%20(BRCA)), TCGA Breast Cancer (BRCA) cohort
 
-**Dataset Summary**
+| File | Content |
+| --- | --- |
+| `HiSeqV2` | Gene expression (IlluminaHiSeq RNA-seq), RSEM normalized, log2(count + 1) |
+| `TCGA.BRCA.sampleMap_BRCA_clinicalMatrix` | Clinical metadata: age, receptor status, stage, PAM50 subtype, survival |
 
-* 20,530 genes analyzed
-* 1,211 breast tissue samples
-* RNA-seq gene expression data
-* Clinical metadata including age, receptor status, tumor stage, and survival information
+* 20,530 genes
+* 1,211 samples used: 1,097 primary tumor (`-01`) and 114 normal tissue (`-11`)
+* 7 metastatic samples (`-06`) excluded
+
+The raw data files are not stored in this repository because of their size (see **How to Run**).
 
 ---
 
@@ -57,30 +61,61 @@ The complete workflow was developed in **Databricks** using **Python** and demon
 
 # 🔬 Analysis Workflow
 
-1. Data Loading
-2. Data Cleaning and Preprocessing
-3. Clinical Metadata Integration
-4. Sample Annotation (Tumor vs Normal)
-5. Exploratory Data Analysis
-6. Differential Gene Expression Analysis
-7. Volcano Plot Visualization
+1. Data loading
+2. Data cleaning and preprocessing
+3. Clinical metadata integration
+4. Sample annotation (tumor vs normal)
+5. Exploratory data analysis and single-gene test (HIF3A)
+6. Genome-wide differential expression: Mann-Whitney U test, log2 fold change, Benjamini-Hochberg FDR
+7. Volcano plot
 8. Principal Component Analysis (PCA)
-9. K-Means Clustering
-10. Logistic Regression Classification
+9. K-Means clustering, compared with PAM50 subtypes
+10. Logistic Regression classification with imbalance-aware metrics and leakage-free cross-validation
 
 ---
 
 # 📊 Key Results
 
-*  Processed **1,211** TCGA-BRCA samples
-*  Analyzed **20,530** genes
-*  Identified significantly differentially expressed genes between tumor and normal tissue
-*  PCA demonstrated clear separation between tumor and normal samples
-*  K-Means clustering identified biologically meaningful sample groups
-*  Logistic Regression achieved:
-  - **Accuracy:** 98.35%
-  - **Precision (Tumor):** 0.99
-  - **Recall (Tumor):** 0.99
+**Differential expression** (FDR < 0.05 and |log2FC| > 1)
+
+* **4,225** differentially expressed genes: **1,412 upregulated** and **2,813 downregulated** in tumor
+* Top upregulated: COL10A1, COL11A1, MMP11, MMP13, CST1 (extracellular matrix and invasion genes)
+* Top downregulated: LEP, ADH1B, ADIPOQ, CA4, TUSC5 (many adipocyte genes, which partly reflects the fat-rich composition of normal breast tissue)
+
+![Volcano plot](figures/volcano_plot.png)
+
+**PCA and clustering**
+
+* PCA largely separates normal samples (high PC1 and PC2) from tumors, with some overlap that reflects tumor heterogeneity
+* The two K-Means clusters do not correspond to tumor vs normal, which points to other structure in the data such as molecular subtypes
+
+![PCA plot](figures/pca_plot.png)
+
+**Classification** (Logistic Regression on PC1 and PC2, 243 held-out test samples)
+
+| Metric | Value |
+| --- | --- |
+| Accuracy | 98.4% |
+| Balanced accuracy | 95.2% |
+| ROC-AUC | 0.996 |
+| Baseline (always predict "Tumor") | 90.5% |
+
+Because only about 9% of samples are normal, balanced accuracy and ROC-AUC are the more informative metrics. The notebook also reports 5-fold cross-validation with scaling and PCA fitted inside each fold, so no information from the test samples leaks into training.
+
+---
+
+# 🚀 How to Run
+
+1. Download `HiSeqV2` and `TCGA.BRCA.sampleMap_BRCA_clinicalMatrix` from the [UCSC Xena TCGA-BRCA cohort](https://xenabrowser.net/datapages/?cohort=TCGA%20Breast%20Cancer%20(BRCA)) and unzip them.
+2. Put both files in a `data/` folder at the root of this repository, or upload them to your Databricks workspace.
+3. Open `notebook/TCGA_BRCA_Data_Analysis.ipynb` in Databricks or Jupyter. If your data is elsewhere, change `DATA_DIR` in the first code cell.
+4. For a local run, install the dependencies first:
+
+```bash
+pip install -r requirements.txt
+```
+
+5. Run all cells. Figures are written to `figures/` and result tables to `results/`.
 
 ---
 
@@ -88,34 +123,37 @@ The complete workflow was developed in **Databricks** using **Python** and demon
 
 ```text
 tcga-brca-gene-expression-analysis/
-│
 ├── README.md
 ├── LICENSE
-├── .gitignore
-│
-└── notebook/
-    ├── TCGA_BRCA_Data_Analysis.ipynb
-    ├── TCGA_BRCA_Data_Analysis.html
-    ├── figures/
-    │   ├── volcano_plot.png
-    │   ├── pca_plot.png
-    │   ├── kmeans_plot.png
-    │   └── confusion_matrix.png
-    │
-    └── results/
-        ├── dge_results.csv
-        └── pca_results.csv
+├── requirements.txt
+├── notebook/
+│   └── TCGA_BRCA_Data_Analysis.ipynb
+├── figures/
+│   ├── volcano_plot.png
+│   ├── pca_plot.png
+│   ├── kmeans_plot.png
+│   └── confusion_matrix.png
+└── results/
+    ├── dge_results.csv      # all 20,530 genes: means, log2FC, p-value, FDR, significance
+    └── pca_results.csv      # PC1, PC2, sample type and cluster for each sample
 ```
 
 ---
 
-# 🚀 Future Improvements
+# ⚠️ Limitations
 
-* Apply False Discovery Rate (FDR) correction
-* Perform Gene Ontology (GO) enrichment analysis
-* Explore KEGG pathway enrichment
-* Compare additional machine learning models such as Random Forest and XGBoost
-* Investigate survival prediction using clinical outcomes
+* The Mann-Whitney U test treats tumor and normal samples as independent, although many normal samples are paired with a tumor from the same patient.
+* Count-based methods such as DESeq2 or limma-voom are the standard for publication-level differential expression.
+* Tumor vs normal classification is a relatively easy task; subtype, stage or survival prediction would be more clinically useful.
+
+---
+
+# 🔭 Future Improvements
+
+* Gene Ontology (GO) and KEGG pathway enrichment of the differentially expressed genes
+* Paired tumor-normal analysis and a DESeq2 comparison
+* Additional models such as Random Forest and XGBoost
+* Survival analysis using the clinical outcomes
 
 ---
 
