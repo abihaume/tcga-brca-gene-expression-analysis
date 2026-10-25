@@ -216,3 +216,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Raw TCGA data files (download from UCSC Xena, see README)
+data/
